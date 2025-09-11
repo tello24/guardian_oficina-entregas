@@ -4,14 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>⚑ CTF Lab</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <!-- efeitos -->
   <div class="bg-grid"></div>
   <div class="bg-noise"></div>
 
@@ -30,10 +27,8 @@
   <main class="container">
     <section class="hero card">
       <h1>Bem-vindo ao laboratório CTF</h1>
-      <p>Teste endpoints, valide entradas e acompanhe respostas no <strong>console</strong> ao vivo. Boa caça à flag 🕵️‍♂️</p>
-      <div class="hint">
-        Dica: todos os envios aparecem no console abaixo com timestamp.
-      </div>
+      <p>Faça o recon, eleve privilégios e capture a flag. Tudo <strong>apenas pelo navegador</strong> ✦</p>
+      <div class="hint">Dica: pistas em <code>/robots.txt</code> e <code>/.well-known/ctf</code>.</div>
     </section>
 
     <section id="dados" class="grid">
@@ -50,6 +45,13 @@
           <input type="email" id="email" name="email" required placeholder=" " autocomplete="email" />
           <label for="email">Email</label>
           <small class="help">Usaremos apenas para o desafio.</small>
+        </div>
+
+        <!-- Campo extra para o CTF -->
+        <div class="field">
+          <input type="text" id="role" name="role" placeholder=" " />
+          <label for="role">Role (opcional)</label>
+          <small class="help">Algumas rotas elevam privilégios temporariamente…</small>
         </div>
 
         <button id="btnExample" type="submit" class="btn">
@@ -80,12 +82,12 @@
       </form>
     </section>
 
-    <section class="card">
+    <section class="card" id="console">
       <div class="card-title-row">
         <h2>Console</h2>
         <button id="btnClear" class="btn btn-ghost" type="button" aria-label="Limpar console">Limpar</button>
       </div>
-      <pre id="console" class="console" aria-live="polite"><code>⟶ Console iniciado. Aguardando ações…</code></pre>
+      <pre class="console" aria-live="polite"><code>⟶ Console iniciado. Aguardando ações…</code></pre>
     </section>
   </main>
 
@@ -93,7 +95,6 @@
     <p>Feito para <strong>CTF</strong>. Respeite o ambiente de teste. ✦</p>
   </footer>
 
-  <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="/app.js"></script>
