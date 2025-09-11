@@ -1,13 +1,11 @@
-// Pequena helper para seletor
+// Helper
 const $ = (s) => document.querySelector(s);
 
-// UI helpers
 function setLoading(btn, isLoading){
   if(!btn) return;
   btn.classList.toggle('loading', isLoading);
   btn.disabled = isLoading;
 }
-
 function toast(message, type='success'){
   const el = $('#toast');
   if(!el) return;
@@ -15,10 +13,8 @@ function toast(message, type='success'){
   el.className = `toast show ${type === 'error' ? 'error' : 'success'}`;
   setTimeout(() => el.classList.remove('show'), 2500);
 }
-
-// Console helpers
 function logLine({ level='info', text='' }){
-  const c = $('#console');
+  const c = document.querySelector('#console .console');
   if(!c) return;
   const time = new Date().toLocaleTimeString();
   const code = c.querySelector('code');
@@ -34,9 +30,8 @@ function escapeHtml(str){
   }[s]));
 }
 
-// Limpar console
 $('#btnClear')?.addEventListener('click', () => {
-  const code = $('#console code');
+  const code = document.querySelector('#console code');
   if(code) code.textContent = '⟶ Console limpo.';
 });
 
@@ -48,11 +43,15 @@ $('#formExample')?.addEventListener('submit', async (event) => {
   try{
     const name = $('#name').value.trim();
     const email = $('#email').value.trim();
+    const roleEl = $('#role');
+    const role = roleEl ? roleEl.value.trim() : '';
+
+    const body = role ? { name, email, role } : { name, email };
 
     const res = await fetch('/postExample', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email })
+      body: JSON.stringify(body)
     });
 
     if(!res.ok){
@@ -63,6 +62,7 @@ $('#formExample')?.addEventListener('submit', async (event) => {
     }
 
     const data = await res.json();
+    // Loga tudo – se vier { flag: ... } você vê aqui sem abrir DevTools
     logLine({ level:'ok', text:`/postExample ➜ ${JSON.stringify(data)}` });
     toast(data.message || 'Dados enviados!');
     event.target.reset();
