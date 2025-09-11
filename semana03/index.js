@@ -1,59 +1,65 @@
-// topo do arquivo:
+// index.js
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-const FLAG = process.env.FLAG || 'flag{ctf_lab_ok}'; // <— flag padrão 
+// personalize se quiser via variável de ambiente
+const FLAG = process.env.FLAG || 'flag{GUARDIAN-CTF-FLAG}';
 
-// middlewares:
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// raiz serve a interface:
+// Página principal
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// PISTA 1: robots.txt indicando um caminho suspeito
+// PISTA 1: robots -> manda para /.well-known/ctf
 app.get('/robots.txt', (_req, res) => {
   res.type('text/plain').send('User-agent: *\nDisallow: /.well-known/ctf\n');
 });
 
-// PISTA 2: arquivo "secreto" com dica em Base64
+// PISTA 2: dica em base64
 app.get('/.well-known/ctf', (_req, res) => {
-  const dica = 'Dica: use o header X-Admin: true no POST /postExample com role=admin';
+  const dica = 'Visite /elevate para ganhar privilégio temporário e depois envie o formulário "Envie seus dados" com role=admin.';
   const b64 = Buffer.from(dica, 'utf8').toString('base64');
   res.type('text/plain').send(`Nada para ver aqui.\n${b64}\n`);
 });
 
-// ENDPOINT COM SEGREDO: libera a flag se você mandar o cabeçalho e o corpo certos
+// Atalho para elevar (seta cookie)
+app.get('/elevate', (req, res) => {
+  // cookie simples (não HttpOnly para você conseguir ver no navegador se quiser)
+  res.cookie('elevated', '1', { maxAge: 10 * 60 * 1000, sameSite: 'Lax' });
+  res.type('text/plain').send('Privilégio temporário concedido por 10 minutos. Volte à página e envie o formulário com role=admin.');
+});
+
+// Endpoint principal com condição da flag (sem terminal)
 app.post('/postExample', (req, res) => {
   const { name, email, role } = req.body || {};
   if (!name || !email) {
     return res.status(400).json({ message: 'Dados inválidos: informe name e email.' });
   }
 
-  const isAdminHeader = String(req.get('x-admin') || '').toLowerCase() === 'true';
-  const isAdminBody = role === 'admin';
-  const debug = String(req.query.debug || '') === '1';
-
-  // CONDIÇÃO OCULTA: header X-Admin: true + role=admin
-  if (isAdminHeader && isAdminBody) {
-    res.set('X-Flag', FLAG);                  // flag no HEADER
-    if (debug) return res.json({ message: 'GG!', flag: FLAG }); // e (opcional) no corpo
-    return res.json({ message: `Recebido! Nome: ${name}, Email: ${email}` });
+  const elevated = req.cookies.elevated === '1';
+  if (elevated && role === 'admin') {
+    res.set('X-Flag', FLAG);
+    return res.json({ message: 'GG!', flag: FLAG });
   }
 
-  // fluxo normal (sem flag)
   return res.json({ message: `Recebido! Nome: ${name}, Email: ${email}` });
 });
 
-// mantém seu /submitForm como estava:
+// Mantém o submitForm do seu exemplo
 app.post('/submitForm', (req, res) => {
   const { nome, mensagem } = req.body || {};
-  if (!nome || !mensagem) return res.status(400).json({ message: 'Preencha nome e mensagem.' });
-  res.json({ message: `Mensagem recebida de ${nome}: ${mensagem}` });
+  if (!nome || !mensagem) {
+    return res.status(400).json({ message: 'Preencha nome e mensagem.' });
+  }
+  return res.json({ message: `Mensagem recebida de ${nome}: ${mensagem}` });
 });
 
 app.listen(port, () => {
