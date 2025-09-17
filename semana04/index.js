@@ -4,7 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 
 // personalize se quiser via variável de ambiente
 const FLAG = process.env.FLAG || 'flag{GUARDIAN-CTF-FLAG}';
